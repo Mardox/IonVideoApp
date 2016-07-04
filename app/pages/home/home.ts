@@ -8,4 +8,8 @@ export class HomePage {
   constructor(private navController: NavController) {
 
   }
+
+  openCamera() {
+    
+  }
 }
