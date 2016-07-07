@@ -1,26 +1,33 @@
 import {Component} from '@angular/core';
 import {NavController} from 'ionic-angular';
-import {Camera} from 'ionic-native';
+declare var navigator : any;
 
 @Component({
   templateUrl: 'build/pages/home/home.html'
 })
 export class HomePage {
-  public base64Image: string;
+  public videoPath: any;
 
   constructor(private navController: NavController) {
   }
 
   openCamera() {
-    Camera.getPicture({
-        destinationType: Camera.DestinationType.DATA_URL,
-        mediaType: Camera.MediaType.ALLMEDIA,
-        targetHeight: 1000,
-        targetWidth: 1000
-    }).then((videoData) => {
-        this.base64Image = "data:image/jpeg;base64," + videoData; 
-    }, (err) => {
-        console.log(err);
-    });
+    // capture callback
+    var captureSuccess = function (mediaFiles) {
+      var i, path, len;
+      for (i = 0, len = mediaFiles.length; i < len; i += 1) {
+        path = mediaFiles[i].fullPath;
+        this.videoPath = path;
+      }
+    };
+
+    // capture error callback
+    var captureError = function (error) {
+      navigator.notification.alert('Error code: ' + error.code, null, 'Capture Error');
+    };
+    // start video capture
+    navigator.device.capture.captureVideo(captureSuccess, captureError, { limit: 1, duration: 10 });
   }
+
+
 }
