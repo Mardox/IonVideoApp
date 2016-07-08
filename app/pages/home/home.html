@@ -11,7 +11,12 @@
   <p>
     Record videos and upload
   </p>
-  <video width="100%" webkit-playsinline src="videoPath"></video>
+
+  <p>{{thumbnailData}}</p>
+  <p>{{videoPath}}</p>
+  
+  <img [src]="thumbnailData" *ngIf="thumbnailData" />
+
   <button fab fab-right fab-bottom (click)="openCamera()">
     <ion-icon name="add"></ion-icon>
   </button>
