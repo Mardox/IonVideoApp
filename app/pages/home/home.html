@@ -6,12 +6,13 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content class="home" padding>
+<ion-content id="content" class="home" padding>
   Welcome
   <p>Record videos and upload</p>
-  
-  <img [src]="thumbnailData" *ngIf="thumbnailData" />
-  <button fab fab-right fab-bottom (click)="openCamera()">
+  <button fab fab-right fab-bottom (click)="takeVideo()">
     <ion-icon name="add"></ion-icon>
   </button>
+
+  <img [src]="thumbnail" *ngIf="thumbnail"/>
+  <img [src]="base64Image" *ngIf="base64Image"/>
 </ion-content>
