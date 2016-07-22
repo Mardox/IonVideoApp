@@ -17,7 +17,7 @@ export class HomePage {
     }
     takeVideo() {
         // capture error callback
-        let captureError = function(error) {
+        let captureError = function (error) {
             alert("Error code: " + error.code + " Capture Error");
         };
         // start video capture
@@ -44,31 +44,42 @@ export class HomePage {
         //         type: contentType
         //     });
         // };
-
-        window.resolveLocalFileSystemURL(path, function(fileEntry) {
-            return fileEntry.file(function(data) {
-                // alert("Data : " + data);
-                let reader = new FileReader();
-                reader.onloadend = function(e: any) {
+        console.log("path " + newPath)
+        let onResolve = (fileEntry) => {
+            console.log("file entry : ");
+            console.log(fileEntry.name);
+            fileEntry.file((data) => {
+                let reader: any;
+                console.log("data: ");
+                console.log(data);
+                reader = new FileReader();
+                reader.onload = (e: any) => {
                     try {
-                        // alert(this.result);
-                        let videoFile = new Parse.File("video-file", { base64: this.result });
-                        alert("video upload begin");
+                        console.log("Before parse file");
+                        let videoFile = new Parse.File("video-file.mp4", { base64: e.target.result });
+                        console.log("after parse file");
                         videoFile.save().then(() => {
                             // The file has been saved to Parse.
                             console.log("File uploaded....");
-                            alert("video uploaded");
                         }, (error) => {
                             // The file either could not be read, or could not be saved to Parse.
                             console.log("File upload failed.");
                         });
                     } catch (err) {
+                        console.log(err.message);
                         alert(err.message);
                     }
                 };
-                return reader.readAsDataURL(data);
+                reader.readAsDataURL(data);
             });
-        });
+        }
+
+        let onResolveFail = (err) => {
+            console.log(err.message);
+        }
+
+        window.resolveLocalFileSystemURL(newPath, onResolve, onResolveFail);
+
 
         window.PKVideoThumbnail.createThumbnail(newPath, "IGNORE", { mode: "base64", quality: .8, position: 5.0, resize: { height: 384, width: 384 } }).then((imageData) => {
             this.thumbnail = imageData;
