@@ -27,82 +27,44 @@ export class HomePage {
         let i: any, path, len;
         for (i = 0, len = mediaFiles.length; i < len; i += 1) {
             path = mediaFiles[i].fullPath;
-        }
-        let newPath = path.replace("file:/", "file:///");
-
-        // let b64toBlobAlt = function(dataURI, contentType) {
-        //     let ab, byteString, i, ia;
-        //     byteString = atob(dataURI.split(",")[1]);
-        //     ab = new ArrayBuffer(byteString.length);
-        //     ia = new Uint8Array(ab);
-        //     i = 0;
-        //     while (i < byteString.length) {
-        //         ia[i] = byteString.charCodeAt(i);
-        //         i++;
-        //     }
-        //     return new Blob([ab], {
-        //         type: contentType
-        //     });
-        // };
-        console.log("path " + newPath)
-        let onResolve = (fileEntry) => {
-            console.log("file entry : ");
-            console.log(fileEntry.name);
-            fileEntry.file((data) => {
-                let reader: any;
-                console.log("data: ");
-                console.log(data);
-                reader = new FileReader();
-                reader.onload = (e: any) => {
-                    try {
-                        console.log("Before parse file");
-                        let videoFile = new Parse.File("video-file.mp4", { base64: e.target.result });
-                        console.log("after parse file");
-                        videoFile.save().then(() => {
-                            // The file has been saved to Parse.
-                            console.log("File uploaded....");
-                        }, (error) => {
-                            // The file either could not be read, or could not be saved to Parse.
-                            console.log("File upload failed.");
-                        });
-                    } catch (err) {
-                        console.log(err.message);
-                        alert(err.message);
-                    }
-                };
-                reader.readAsDataURL(data);
+            let newPath = path.replace("file:/", "file:///");
+            //Generate thumbnail
+            window.PKVideoThumbnail.createThumbnail(newPath, "IGNORE", { mode: "base64", quality: .8, position: 5.0, resize: { height: 384, width: 384 } }).then((imageData) => {
+                this.thumbnail = imageData;
+                let img = document.createElement("img");
+                img.src = imageData;
+                document.getElementById("content").appendChild(img);
+                //upload thumbnail
+                let file = new Parse.File("thumbnail", { base64: imageData });
+                file.save().then(() => {
+                    // The file has been saved to Parse.
+                    console.log("File uploaded....");
+                    alert("uploaded");
+                }, (error) => {
+                    // The file either could not be read, or could not be saved to Parse.
+                    console.log("File upload failed.");
+                });
+            }).catch((err) => {
+                alert(err);
             });
         }
 
-        let onResolveFail = (err) => {
-            console.log(err.message);
-        }
-
-        window.resolveLocalFileSystemURL(newPath, onResolve, onResolveFail);
-
-
-        window.PKVideoThumbnail.createThumbnail(newPath, "IGNORE", { mode: "base64", quality: .8, position: 5.0, resize: { height: 384, width: 384 } }).then((imageData) => {
-            this.thumbnail = imageData;
-            let img = document.createElement("img");
-            img.src = imageData;
-            document.getElementById("content").appendChild(img);
-
-            let file = new Parse.File("thumbnail-file", { base64: imageData });
-            file.save().then(() => {
-                // The file has been saved to Parse.
-                console.log("File uploaded....");
-                alert("uploaded");
-            }, (error) => {
-                // The file either could not be read, or could not be saved to Parse.
-                console.log("File upload failed.");
-            });
-        }).catch((err) => {
-            alert(err);
+        /**
+         * The issue causing part
+         * The error in the promise below says
+         * "Unable to connect to Parse API"
+         * with the status 400
+         */
+        //Upload video
+        let videoFile = new Parse.File("video.mp4", mediaFiles[0]);
+        console.log("after parse file " + videoFile);
+        videoFile.save().then(() => {
+            alert("video uploaded");
+            console.log("video File uploaded....");
+        }, (error) => {
+            console.log(error);
+            console.log("Video File upload failed.");
         });
-
-        // upload video to parse in the background
-        // let parseFile = newPath.replace("file:///", "/");
-        // alert(parseFile);
     }
 
     takePicture() {
@@ -116,7 +78,7 @@ export class HomePage {
             let file = new Parse.File("thumbnail-file", { base64: this.base64Image });
             file.save().then(() => {
                 // The file has been saved to Parse.
-                console.log("File uploaded....");
+                console.log("Image File uploaded....");
                 alert("uploaded");
             }, (error) => {
                 // The file either could not be read, or could not be saved to Parse.
